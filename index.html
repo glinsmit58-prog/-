@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة الوحدات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo">و</div>
+      <div>
+        <h1>إدارة الوحدات</h1>
+        <p class="subtitle">تتبّع التحويلات، الديون، الأرباح والعمولات</p>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="dashboard">لوحة التحكم</button>
+      <button class="tab-btn" data-tab="new">عملية جديدة</button>
+      <button class="tab-btn" data-tab="calc">حاسبة عكسية</button>
+      <button class="tab-btn" data-tab="history">السجل</button>
+      <button class="tab-btn" data-tab="debts">الديون</button>
+      <button class="tab-btn" data-tab="settings">الإعدادات</button>
+    </nav>
+  </header>
+
+  <main class="app-main">
+    <!-- لوحة التحكم -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <div class="cards-grid">
+        <div class="card metric">
+          <span class="label">الرصيد المتبقي</span>
+          <span class="value" id="m-balance">0</span>
+          <span class="unit">وحدة</span>
+        </div>
+        <div class="card metric">
+          <span class="label">إجمالي الرصيد المستلم</span>
+          <span class="value" id="m-topups">0</span>
+          <span class="unit">وحدة</span>
+        </div>
+        <div class="card metric">
+          <span class="label">إجمالي ما حُوِّل للزبائن</span>
+          <span class="value" id="m-transferred">0</span>
+          <span class="unit">وحدة</span>
+        </div>
+        <div class="card metric">
+          <span class="label">إجمالي العمولات</span>
+          <span class="value" id="m-commissions">0</span>
+          <span class="unit">وحدة</span>
+        </div>
+        <div class="card metric success">
+          <span class="label">المتحصَّل نقداً</span>
+          <span class="value" id="m-cash">0</span>
+          <span class="unit">ل.س</span>
+        </div>
+        <div class="card metric warning">
+          <span class="label">إجمالي الديون المعلقة</span>
+          <span class="value" id="m-debt">0</span>
+          <span class="unit">ل.س</span>
+        </div>
+        <div class="card metric primary">
+          <span class="label">الربح المحقَّق (نقدي + ديون مسددة)</span>
+          <span class="value" id="m-profit-realized">0</span>
+          <span class="unit">ل.س</span>
+        </div>
+        <div class="card metric">
+          <span class="label">الربح المتوقع (شاملاً الديون)</span>
+          <span class="value" id="m-profit-expected">0</span>
+          <span class="unit">ل.س</span>
+        </div>
+        <div class="card metric">
+          <span class="label">عدد العمليات</span>
+          <span class="value" id="m-count">0</span>
+          <span class="unit">عملية</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>كيف صُرف الرصيد؟</h2>
+        <div class="bar-breakdown" id="balance-breakdown"></div>
+      </div>
+    </section>
+
+    <!-- عملية جديدة -->
+    <section id="tab-new" class="tab-panel">
+      <div class="card">
+        <h2>تسجيل عملية تحويل جديدة</h2>
+        <form id="new-tx-form" class="form">
+          <div class="form-row">
+            <label>اسم الزبون <span class="hint">(اختياري للنقدي، مطلوب للدين)</span></label>
+            <input type="text" id="tx-name" placeholder="اسم أو رقم هاتف" />
+          </div>
+
+          <div class="form-row">
+            <label>المبلغ المدفوع (ل.س)</label>
+            <div class="input-with-helpers">
+              <input type="number" id="tx-paid" min="5" step="5" placeholder="يجب أن يكون من مضاعفات 5" required />
+              <div class="quick-amounts">
+                <button type="button" data-amount="50">50</button>
+                <button type="button" data-amount="100">100</button>
+                <button type="button" data-amount="200">200</button>
+                <button type="button" data-amount="500">500</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>نوع العملية</label>
+            <div class="radio-group">
+              <label class="radio"><input type="radio" name="tx-type" value="cash" checked /> نقدي</label>
+              <label class="radio"><input type="radio" name="tx-type" value="debt" /> دَيْن</label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>ملاحظات <span class="hint">(اختياري)</span></label>
+            <input type="text" id="tx-note" placeholder="مثال: تحويل لرقم 09xxxx" />
+          </div>
+
+          <div class="preview" id="tx-preview">
+            <div class="preview-row"><span>سيُحوَّل من رصيدك:</span><strong id="p-transferred">0 وحدة</strong></div>
+            <div class="preview-row"><span>سيصل للزبون:</span><strong id="p-arrived">0 وحدة</strong></div>
+            <div class="preview-row"><span>عمولة التحويل:</span><strong id="p-commission">0 وحدة</strong></div>
+            <div class="preview-row total"><span>إجمالي المخصوم من الرصيد:</span><strong id="p-deducted">0 وحدة</strong></div>
+            <div class="preview-row profit"><span>الربح:</span><strong id="p-profit">0 ل.س</strong></div>
+            <div class="preview-row warn hidden" id="p-warn">⚠ المبلغ يجب أن يكون من مضاعفات 5</div>
+            <div class="preview-row danger hidden" id="p-no-balance">⚠ الرصيد المتبقي لا يكفي لإتمام هذه العملية</div>
+          </div>
+
+          <button type="submit" class="btn primary">حفظ العملية</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- حاسبة عكسية -->
+    <section id="tab-calc" class="tab-panel">
+      <div class="card">
+        <h2>حاسبة عكسية: الزبون يريد أن يصله مبلغ معيّن</h2>
+        <p class="muted">أدخل المبلغ الذي يريد الزبون أن يصله، وسأحسب لك كم يجب أن يدفع وكم ستحوّل.</p>
+        <form id="calc-form" class="form">
+          <div class="form-row">
+            <label>المبلغ الذي يريده الزبون أن يصله</label>
+            <input type="number" id="calc-target" min="1" step="any" placeholder="مثلاً 180" />
+          </div>
+        </form>
+        <div class="preview" id="calc-preview">
+          <div class="preview-row"><span>يجب أن يدفع الزبون:</span><strong id="c-paid">—</strong></div>
+          <div class="preview-row"><span>ستحوّل من رصيدك:</span><strong id="c-transferred">—</strong></div>
+          <div class="preview-row"><span>الذي سيصله فعلياً:</span><strong id="c-arrived">—</strong></div>
+          <div class="preview-row"><span>الفائض فوق المطلوب:</span><strong id="c-excess">—</strong></div>
+          <div class="preview-row"><span>عمولة التحويل:</span><strong id="c-commission">—</strong></div>
+          <div class="preview-row total"><span>إجمالي المخصوم من الرصيد:</span><strong id="c-deducted">—</strong></div>
+          <div class="preview-row profit"><span>الربح:</span><strong id="c-profit">—</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- السجل -->
+    <section id="tab-history" class="tab-panel">
+      <div class="card">
+        <div class="row-between">
+          <h2>سجل العمليات</h2>
+          <div class="filter-group">
+            <select id="history-filter">
+              <option value="all">الكل</option>
+              <option value="cash">نقدي</option>
+              <option value="debt">دين معلَّق</option>
+              <option value="settled">دين مسدَّد</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>الزبون</th>
+                <th>دفع</th>
+                <th>حُوِّل</th>
+                <th>وصل</th>
+                <th>عمولة</th>
+                <th>ربح</th>
+                <th>النوع</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- الديون -->
+    <section id="tab-debts" class="tab-panel">
+      <div class="card">
+        <h2>الديون المعلَّقة</h2>
+        <p class="muted">قائمة الزبائن الذين أخذوا تحويلاً ولم يدفعوا بعد. اضغط "تسديد" عند استلام المبلغ.</p>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>الزبون</th>
+                <th>المبلغ المستحق</th>
+                <th>وصله</th>
+                <th>ملاحظات</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="debts-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- الإعدادات -->
+    <section id="tab-settings" class="tab-panel">
+      <div class="card">
+        <h2>شحن رصيد للعامل</h2>
+        <form id="topup-form" class="form inline">
+          <input type="number" id="topup-amount" min="1" step="any" placeholder="عدد الوحدات" required />
+          <input type="text" id="topup-note" placeholder="ملاحظة (اختياري)" />
+          <button class="btn primary" type="submit">إضافة الرصيد</button>
+        </form>
+        <div class="table-wrap">
+          <table class="data-table compact">
+            <thead>
+              <tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظة</th><th></th></tr>
+            </thead>
+            <tbody id="topups-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>أسعار التحويل</h2>
+        <form id="rates-form" class="form">
+          <div class="form-row">
+            <label>معامل ما يُخصم من الرصيد لكل 1 ل.س مدفوعة <span class="hint">(الافتراضي 0.85)</span></label>
+            <input type="number" id="rate-transferred" step="0.0001" min="0" />
+          </div>
+          <div class="form-row">
+            <label>معامل ما يصل للزبون لكل 1 ل.س مدفوعة <span class="hint">(الافتراضي 0.8173)</span></label>
+            <input type="number" id="rate-arrived" step="0.0001" min="0" />
+          </div>
+          <div class="form-row">
+            <label>وحدة الدفع <span class="hint">(الافتراضي 5)</span></label>
+            <input type="number" id="payment-step" step="1" min="1" />
+          </div>
+          <button class="btn primary" type="submit">حفظ الأسعار</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>شرائح العمولة</h2>
+        <p class="muted">العمولة تُحسب بناءً على قيمة <strong>الوحدات المحوَّلة</strong>.</p>
+        <div id="tiers-list"></div>
+        <button id="add-tier" class="btn">إضافة شريحة</button>
+        <button id="save-tiers" class="btn primary">حفظ الشرائح</button>
+      </div>
+
+      <div class="card">
+        <h2>النسخ الاحتياطي</h2>
+        <div class="row-buttons">
+          <button id="export-btn" class="btn">تصدير البيانات (JSON)</button>
+          <label class="btn file-btn">
+            استيراد البيانات
+            <input type="file" id="import-file" accept="application/json" hidden />
+          </label>
+          <button id="reset-btn" class="btn danger">حذف كل البيانات</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
